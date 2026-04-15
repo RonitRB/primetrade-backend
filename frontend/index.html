@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Primetrade – Task Manager</title>
+  <meta name="description" content="Primetrade Task Manager – Secure JWT-authenticated task management system with role-based access control.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0e1a;
+      --bg-secondary: #0f1629;
+      --bg-card: #141b2d;
+      --bg-card-hover: #1a2238;
+      --border: #1e2d4a;
+      --border-bright: #2a3f6f;
+      --accent: #4f7ffa;
+      --accent-hover: #6b93ff;
+      --accent-glow: rgba(79, 127, 250, 0.2);
+      --success: #10d48e;
+      --success-bg: rgba(16, 212, 142, 0.1);
+      --danger: #ff4d6d;
+      --danger-bg: rgba(255, 77, 109, 0.1);
+      --warning: #ffb347;
+      --text-primary: #e8eaf6;
+      --text-secondary: #8892b0;
+      --text-muted: #4a5568;
+      --gradient: linear-gradient(135deg, #4f7ffa 0%, #7c5cbf 100%);
+      --gradient-glow: linear-gradient(135deg, rgba(79,127,250,0.15), rgba(124,92,191,0.15));
+      --radius: 14px;
+      --radius-sm: 8px;
+      --shadow: 0 8px 32px rgba(0,0,0,0.4);
+      --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Background grid effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(79,127,250,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,127,250,0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Glow orbs */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(79,127,250,0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+    }
+
+    /* ─── AUTH PAGE ─── */
+    .auth-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .auth-box {
+      width: 100%;
+      max-width: 440px;
+      animation: fadeInUp 0.5s ease;
+    }
+
+    .auth-logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .auth-logo .logo-icon {
+      width: 56px; height: 56px;
+      background: var(--gradient);
+      border-radius: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 32px rgba(79,127,250,0.4);
+    }
+
+    .auth-logo h1 {
+      font-size: 26px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .auth-logo p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .auth-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      box-shadow: var(--shadow);
+    }
+
+    .tab-switcher {
+      display: flex;
+      background: var(--bg-secondary);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 12px rgba(79,127,250,0.3);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s ease;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    input::placeholder { color: var(--text-muted); }
+
+    select option { background: var(--bg-card); }
+
+    .btn {
+      width: 100%;
+      padding: 13px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--gradient);
+      color: white;
+      box-shadow: 0 4px 16px rgba(79,127,250,0.35);
+      margin-top: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(79,127,250,0.5);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert-error { background: var(--danger-bg); border: 1px solid rgba(255,77,109,0.3); color: #ff8099; }
+    .alert-success { background: var(--success-bg); border: 1px solid rgba(16,212,142,0.3); color: #10d48e; }
+
+    .hidden { display: none !important; }
+
+    /* ─── DASHBOARD ─── */
+    .dashboard-page { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* Navbar */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: rgba(20,27,45,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-brand .logo-icon-sm {
+      width: 36px; height: 36px;
+      background: var(--gradient);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .nav-brand h2 {
+      font-size: 18px;
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 13px;
+    }
+
+    .user-avatar {
+      width: 28px; height: 28px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .role-tag {
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .role-tag.admin { background: rgba(255,179,71,0.15); color: var(--warning); }
+    .role-tag.user  { background: rgba(79,127,250,0.15); color: var(--accent-hover); }
+
+    .btn-logout {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-logout:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
+    }
+
+    /* Dashboard content */
+    .dashboard-content {
+      flex: 1;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 32px 20px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+
+    /* Section Cards */
+    .section-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .section-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-icon {
+      width: 32px; height: 32px;
+      background: var(--gradient-glow);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .section-body { padding: 24px; }
+
+    /* Create task form */
+    .create-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .create-form .span-2 { grid-column: span 2; }
+
+    .btn-create {
+      padding: 12px 24px;
+      background: var(--gradient);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(79,127,250,0.3);
+    }
+
+    .btn-create:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(79,127,250,0.45);
+    }
+
+    /* Task list */
+    .task-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .task-item {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: all 0.2s ease;
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .task-item:hover {
+      border-color: var(--border-bright);
+      background: var(--bg-card-hover);
+      transform: translateX(3px);
+    }
+
+    .task-status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+
+    .task-status-dot.pending    { background: var(--text-muted); }
+    .task-status-dot.in-progress { background: var(--warning); box-shadow: 0 0 8px rgba(255,179,71,0.5); }
+    .task-status-dot.completed  { background: var(--success); box-shadow: 0 0 8px rgba(16,212,142,0.5); }
+
+    .task-info { flex: 1; min-width: 0; }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .task-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge.pending     { background: rgba(74,85,104,0.3); color: #8892b0; }
+    .status-badge.in-progress { background: rgba(255,179,71,0.15); color: var(--warning); }
+    .status-badge.completed   { background: rgba(16,212,142,0.15); color: var(--success); }
+
+    .task-by {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      align-items: center;
+    }
+
+    .btn-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+    }
+
+    .btn-icon.edit:hover  { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+    .btn-icon.del:hover   { border-color: var(--danger); background: var(--danger-bg); color: var(--danger); }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+      padding: 20px;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: fadeInUp 0.3s ease;
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-cancel:hover { border-color: var(--border-bright); color: var(--text-primary); }
+
+    .btn-save {
+      flex: 1;
+      padding: 12px;
+      background: var(--gradient);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 16px rgba(79,127,250,0.3);
+    }
+
+    .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      padding: 14px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-bright);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 260px;
+      animation: slideInRight 0.3s ease;
+    }
+
+    .toast.success { border-left: 3px solid var(--success); }
+    .toast.error   { border-left: 3px solid var(--danger); }
+
+    /* Refresh button */
+    .btn-refresh {
+      padding: 6px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-refresh:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+
+    /* Loader */
+    .loader {
+      display: inline-block;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: repeat(3, 1fr); }
+      .create-form { grid-template-columns: 1fr; }
+      .create-form .span-2 { grid-column: span 1; }
+      .navbar { padding: 14px 16px; }
+      .dashboard-content { padding: 20px 12px; }
+      .user-badge span.user-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- ─── AUTH PAGE ─── -->
+  <div class="auth-page" id="authPage">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="logo-icon">⚡</div>
+        <h1>Primetrade</h1>
+        <p>Secure Task Management Platform</p>
+      </div>
+
+      <div class="auth-card">
+        <div class="tab-switcher">
+          <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+          <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+          <div id="loginAlert"></div>
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+          </div>
+          <button class="btn btn-primary" id="loginBtn" onclick="login()">
+            <span>Sign In</span>
+          </button>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerForm" class="hidden">
+          <div id="registerAlert"></div>
+          <div class="form-group">
+            <label for="regName">Full Name</label>
+            <input type="text" id="regName" placeholder="John Doe">
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email Address</label>
+            <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" placeholder="Min. 6 characters" autocomplete="new-password">
+          </div>
+          <div class="form-group">
+            <label for="regRole">Account Role</label>
+            <select id="regRole">
+              <option value="user">👤 User – Manage own tasks</option>
+              <option value="admin">🛡️ Admin – Manage all tasks</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" id="registerBtn" onclick="register()">
+            <span>Create Account</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── DASHBOARD PAGE ─── -->
+  <div class="dashboard-page hidden" id="dashboardPage">
+
+    <nav class="navbar">
+      <div class="nav-brand">
+        <div class="logo-icon-sm">⚡</div>
+        <h2>Primetrade</h2>
+      </div>
+      <div class="nav-right">
+        <div class="user-badge">
+          <div class="user-avatar" id="userAvatar">J</div>
+          <span class="user-name" id="userName">User</span>
+          <span class="role-tag" id="roleTag">user</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+      </div>
+    </nav>
+
+    <div class="dashboard-content">
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-number" id="statTotal">0</div>
+          <div class="stat-label">Total Tasks</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statProgress" style="background: linear-gradient(135deg, #ffb347, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+          <div class="stat-label">In Progress</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statDone" style="background: linear-gradient(135deg, #10d48e, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+          <div class="stat-label">Completed</div>
+        </div>
+      </div>
+
+      <!-- Create Task -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>
+            <div class="section-icon">➕</div>
+            Create New Task
+          </h3>
+        </div>
+        <div class="section-body">
+          <div id="createAlert"></div>
+          <div class="create-form">
+            <div class="form-group span-2">
+              <label for="taskTitle">Task Title *</label>
+              <input type="text" id="taskTitle" placeholder="What needs to be done?">
+            </div>
+            <div class="form-group span-2">
+              <label for="taskDesc">Description</label>
+              <input type="text" id="taskDesc" placeholder="Optional details...">
+            </div>
+            <div class="form-group">
+              <label for="taskStatus">Status</label>
+              <select id="taskStatus">
+                <option value="pending">⏳ Pending</option>
+                <option value="in-progress">🔄 In Progress</option>
+                <option value="completed">✅ Completed</option>
+              </select>
+            </div>
+            <div class="form-group" style="display:flex; align-items:flex-end;">
+              <button class="btn-create" id="createBtn" onclick="createTask()">
+                <span>➕</span>
+                <span>Add Task</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task List -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3>
+            <div class="section-icon">📋</div>
+            <span id="taskListTitle">My Tasks</span>
+          </h3>
+          <button class="btn-refresh" onclick="loadTasks()">🔄 Refresh</button>
+        </div>
+        <div class="section-body">
+          <div class="task-list" id="taskList">
+            <div class="empty-state">
+              <div class="loader"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── EDIT MODAL ─── -->
+  <div class="modal-overlay hidden" id="editModal">
+    <div class="modal">
+      <h3>✏️ Update Task</h3>
+      <input type="hidden" id="editTaskId">
+      <div class="form-group">
+        <label for="editTitle">Title</label>
+        <input type="text" id="editTitle" placeholder="Task title">
+      </div>
+      <div class="form-group">
+        <label for="editDesc">Description</label>
+        <input type="text" id="editDesc" placeholder="Description">
+      </div>
+      <div class="form-group">
+        <label for="editStatus">Status</label>
+        <select id="editStatus">
+          <option value="pending">⏳ Pending</option>
+          <option value="in-progress">🔄 In Progress</option>
+          <option value="completed">✅ Completed</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveUpdate()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</div>
+
+<script>
+  const API = 'http://localhost:5000/api/v1';
+  let token = localStorage.getItem('pt_token');
+  let currentUser = JSON.parse(localStorage.getItem('pt_user') || 'null');
+  let allTasks = [];
+
+  // ── Init ──
+  if (token && currentUser) showDashboard();
+
+  // ── Tab switching ──
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').classList.toggle('hidden', !isLogin);
+    document.getElementById('registerForm').classList.toggle('hidden', isLogin);
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+    clearAlert('loginAlert');
+    clearAlert('registerAlert');
+  }
+
+  // ── Alert helpers ──
+  function showAlert(id, msg, type = 'error') {
+    const el = document.getElementById(id);
+    el.innerHTML = `<div class="alert alert-${type}">${type === 'error' ? '⚠️' : '✅'} ${msg}</div>`;
+  }
+
+  function clearAlert(id) {
+    document.getElementById(id).innerHTML = '';
+  }
+
+  // ── Toast ──
+  function toast(msg, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `${type === 'success' ? '✅' : '❌'} ${msg}`;
+    container.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(20px)'; el.style.transition = '0.3s'; setTimeout(() => el.remove(), 300); }, 3000);
+  }
+
+  // ── Auth ──
+  async function register() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const role = document.getElementById('regRole').value;
+
+    if (!name || !email || !password) return showAlert('registerAlert', 'Please fill in all fields.');
+    if (password.length < 6) return showAlert('registerAlert', 'Password must be at least 6 characters.');
+
+    const btn = document.getElementById('registerBtn');
+    btn.innerHTML = '<div class="loader"></div>';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        saveSession(data);
+        toast('Welcome to Primetrade! 🎉');
+        showDashboard();
+      } else {
+        showAlert('registerAlert', data.message || 'Registration failed.');
+      }
+    } catch {
+      showAlert('registerAlert', 'Server unreachable. Is the backend running?');
+    }
+    btn.innerHTML = '<span>Create Account</span>';
+    btn.disabled = false;
+  }
+
+  async function login() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) return showAlert('loginAlert', 'Please enter email and password.');
+
+    const btn = document.getElementById('loginBtn');
+    btn.innerHTML = '<div class="loader"></div>';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        saveSession(data);
+        toast(`Welcome back, ${data.user.name}! 👋`);
+        showDashboard();
+      } else {
+        showAlert('loginAlert', data.message || 'Login failed.');
+      }
+    } catch {
+      showAlert('loginAlert', 'Server unreachable. Is the backend running?');
+    }
+    btn.innerHTML = '<span>Sign In</span>';
+    btn.disabled = false;
+  }
+
+  function saveSession(data) {
+    token = data.token;
+    currentUser = data.user;
+    localStorage.setItem('pt_token', token);
+    localStorage.setItem('pt_user', JSON.stringify(currentUser));
+  }
+
+  function logout() {
+    localStorage.removeItem('pt_token');
+    localStorage.removeItem('pt_user');
+    token = null; currentUser = null;
+    document.getElementById('authPage').classList.remove('hidden');
+    document.getElementById('dashboardPage').classList.add('hidden');
+    toast('Signed out successfully.', 'success');
+  }
+
+  // ── Dashboard ──
+  function showDashboard() {
+    document.getElementById('authPage').classList.add('hidden');
+    document.getElementById('dashboardPage').classList.remove('hidden');
+
+    const initial = currentUser?.name?.charAt(0)?.toUpperCase() || 'U';
+    document.getElementById('userAvatar').textContent = initial;
+    document.getElementById('userName').textContent = currentUser?.name;
+
+    const roleTag = document.getElementById('roleTag');
+    roleTag.textContent = currentUser?.role;
+    roleTag.className = `role-tag ${currentUser?.role}`;
+
+    if (currentUser?.role === 'admin') {
+      document.getElementById('taskListTitle').textContent = 'All Tasks (Admin View)';
+    }
+
+    loadTasks();
+  }
+
+  // ── Tasks ──
+  async function loadTasks() {
+    try {
+      const res = await fetch(`${API}/tasks`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      allTasks = data.tasks || [];
+      renderTasks(allTasks);
+      updateStats(allTasks);
+    } catch {
+      toast('Failed to load tasks.', 'error');
+    }
+  }
+
+  function updateStats(tasks) {
+    document.getElementById('statTotal').textContent = tasks.length;
+    document.getElementById('statProgress').textContent = tasks.filter(t => t.status === 'in-progress').length;
+    document.getElementById('statDone').textContent = tasks.filter(t => t.status === 'completed').length;
+  }
+
+  function renderTasks(tasks) {
+    const list = document.getElementById('taskList');
+    if (!tasks.length) {
+      list.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No tasks yet. Create your first task above!</p></div>`;
+      return;
+    }
+    list.innerHTML = tasks.map(task => `
+      <div class="task-item" id="task-${task._id}">
+        <div class="task-status-dot ${task.status}"></div>
+        <div class="task-info">
+          <div class="task-title">${escHtml(task.title)}</div>
+          ${task.description ? `<div class="task-desc">${escHtml(task.description)}</div>` : ''}
+          <div class="task-meta">
+            <span class="status-badge ${task.status}">${task.status}</span>
+            ${task.createdBy?.name ? `<span class="task-by">By ${escHtml(task.createdBy.name)}</span>` : ''}
+          </div>
+        </div>
+        <div class="task-actions">
+          <button class="btn-icon edit" onclick="openEdit('${task._id}')" title="Edit">✏️</button>
+          <button class="btn-icon del" onclick="deleteTask('${task._id}')" title="Delete">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function createTask() {
+    const title = document.getElementById('taskTitle').value.trim();
+    const description = document.getElementById('taskDesc').value.trim();
+    const status = document.getElementById('taskStatus').value;
+
+    if (!title) return showAlert('createAlert', 'Task title is required.');
+
+    const btn = document.getElementById('createBtn');
+    btn.innerHTML = '<div class="loader"></div>';
+    btn.disabled = true;
+
+    try {
+      const res = await fetch(`${API}/tasks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ title, description, status })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        clearAlert('createAlert');
+        document.getElementById('taskTitle').value = '';
+        document.getElementById('taskDesc').value = '';
+        document.getElementById('taskStatus').value = 'pending';
+        toast('Task created successfully! ✅');
+        loadTasks();
+      } else {
+        showAlert('createAlert', data.message || 'Failed to create task.');
+      }
+    } catch {
+      showAlert('createAlert', 'Server error. Please try again.');
+    }
+    btn.innerHTML = '<span>➕</span><span>Add Task</span>';
+    btn.disabled = false;
+  }
+
+  // Edit modal
+  function openEdit(id) {
+    const task = allTasks.find(t => t._id === id);
+    if (!task) return;
+    document.getElementById('editTaskId').value = id;
+    document.getElementById('editTitle').value = task.title;
+    document.getElementById('editDesc').value = task.description || '';
+    document.getElementById('editStatus').value = task.status;
+    document.getElementById('editModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('editModal').classList.add('hidden');
+  }
+
+  async function saveUpdate() {
+    const id = document.getElementById('editTaskId').value;
+    const title = document.getElementById('editTitle').value.trim();
+    const description = document.getElementById('editDesc').value.trim();
+    const status = document.getElementById('editStatus').value;
+
+    if (!title) return toast('Title cannot be empty.', 'error');
+
+    try {
+      const res = await fetch(`${API}/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ title, description, status })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        closeModal();
+        toast('Task updated! ✅');
+        loadTasks();
+      } else {
+        toast(data.message || 'Update failed.', 'error');
+      }
+    } catch {
+      toast('Server error.', 'error');
+    }
+  }
+
+  async function deleteTask(id) {
+    if (!confirm('Delete this task? This cannot be undone.')) return;
+    try {
+      const res = await fetch(`${API}/tasks/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast('Task deleted.');
+        loadTasks();
+      } else {
+        const data = await res.json();
+        toast(data.message || 'Delete failed.', 'error');
+      }
+    } catch {
+      toast('Server error.', 'error');
+    }
+  }
+
+  // Close modal on backdrop click
+  document.getElementById('editModal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Enter key support for auth forms
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (!document.getElementById('loginForm').classList.contains('hidden')) login();
+      else if (!document.getElementById('registerForm').classList.contains('hidden')) register();
+    }
+  });
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>
