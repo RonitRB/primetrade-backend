@@ -1,10 +1,10 @@
-# 🚀 Primetrade Backend API
+# Primetrade Backend API
 
 A scalable REST API with JWT Authentication, Role-Based Access Control, and full CRUD operations — built with Node.js, Express, and MongoDB.
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -17,7 +17,7 @@ A scalable REST API with JWT Authentication, Role-Based Access Control, and full
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 | Layer      | Technology                        |
 |------------|-----------------------------------|
@@ -30,7 +30,7 @@ A scalable REST API with JWT Authentication, Role-Based Access Control, and full
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 primetrade-backend/
@@ -57,7 +57,7 @@ primetrade-backend/
 
 ---
 
-## ⚡ Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -87,7 +87,7 @@ The API will be live at: `http://localhost:5000`
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 Create a `.env` file in the `backend/` directory:
 
@@ -99,7 +99,7 @@ JWT_SECRET=your_super_secret_jwt_key_here
 
 ---
 
-## 📖 API Documentation
+## API Documentation
 
 ### Base URL
 ```
@@ -114,7 +114,7 @@ Response: { "message": "Primetrade API v1 is running" }
 
 ---
 
-### 🔑 Auth Endpoints (`/api/v1/auth`)
+### Auth Endpoints (`/api/v1/auth`)
 
 #### Register User
 ```http
@@ -174,7 +174,7 @@ Authorization: Bearer <jwt_token>
 
 ---
 
-### ✅ Task Endpoints (`/api/v1/tasks`)
+### Task Endpoints (`/api/v1/tasks`)
 > All task routes require `Authorization: Bearer <jwt_token>` header.
 
 #### Create Task
@@ -259,7 +259,7 @@ Authorization: Bearer <admin_jwt_token>
 
 ---
 
-## 🔒 Role-Based Access
+## Role-Based Access
 
 | Action              | User | Admin |
 |---------------------|------|-------|
@@ -274,7 +274,7 @@ Authorization: Bearer <admin_jwt_token>
 
 ---
 
-## 🖥 Frontend UI
+## Frontend UI
 
 A lightweight Vanilla JS frontend is included at `frontend/index.html`.
 
@@ -290,19 +290,19 @@ Simply open `frontend/index.html` in your browser while the backend is running o
 
 ---
 
-## 📈 Scalability Notes
+## Scalability Notes
 
 See [SCALABILITY.md](./SCALABILITY.md) for a detailed breakdown of the architecture decisions and scaling strategy.
 
 ---
 
-## 📬 Postman Collection
+## Postman Collection
 
 Import `Primetrade_API.postman_collection.json` (included in root) into Postman to test all endpoints with pre-configured requests and environment variables.
 
 ---
 
-## 🔐 Security Practices
+## Security Practices
 
 - Passwords hashed with **bcryptjs** (salt rounds: 12)
 - JWT tokens signed with secret key, expire in **7 days**
@@ -312,6 +312,6 @@ Import `Primetrade_API.postman_collection.json` (included in root) into Postman 
 
 ---
 
-## 👤 Author
+## Author
 
 Built as part of the Primetrade.ai Backend Developer Internship Assignment.
